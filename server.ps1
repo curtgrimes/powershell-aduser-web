@@ -6,59 +6,64 @@
 # https://gist.github.com/theit8514/58a31895ae901206f6957a382f61618b
 function Get-MimeType() {
     param($extension);
-    switch($extension) {
-        ".doc" {"application/msword"}
-        ".dot" {"application/msword"}
+    switch ($extension) {
+        ".doc" { "application/msword" }
+        ".dot" { "application/msword" }
 
-        ".docx" {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
-        ".dotx" {"application/vnd.openxmlformats-officedocument.wordprocessingml.template"}
-        ".docm" {"application/vnd.ms-word.document.macroEnabled.12"}
-        ".dotm" {"application/vnd.ms-word.template.macroEnabled.12"}
+        ".docx" { "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+        ".dotx" { "application/vnd.openxmlformats-officedocument.wordprocessingml.template" }
+        ".docm" { "application/vnd.ms-word.document.macroEnabled.12" }
+        ".dotm" { "application/vnd.ms-word.template.macroEnabled.12" }
 
-        ".xls" {"application/vnd.ms-excel"}
-        ".xlt" {"application/vnd.ms-excel"}
-        ".xla" {"application/vnd.ms-excel"}
+        ".xls" { "application/vnd.ms-excel" }
+        ".xlt" { "application/vnd.ms-excel" }
+        ".xla" { "application/vnd.ms-excel" }
 
-        ".xlsx" {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
-        ".xltx" {"application/vnd.openxmlformats-officedocument.spreadsheetml.template"}
-        ".xlsm" {"application/vnd.ms-excel.sheet.macroEnabled.12"}
-        ".xltm" {"application/vnd.ms-excel.template.macroEnabled.12"}
-        ".xlam" {"application/vnd.ms-excel.addin.macroEnabled.12"}
-        ".xlsb" {"application/vnd.ms-excel.sheet.binary.macroEnabled.12"}
+        ".xlsx" { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+        ".xltx" { "application/vnd.openxmlformats-officedocument.spreadsheetml.template" }
+        ".xlsm" { "application/vnd.ms-excel.sheet.macroEnabled.12" }
+        ".xltm" { "application/vnd.ms-excel.template.macroEnabled.12" }
+        ".xlam" { "application/vnd.ms-excel.addin.macroEnabled.12" }
+        ".xlsb" { "application/vnd.ms-excel.sheet.binary.macroEnabled.12" }
 
-        ".ppt" {"application/vnd.ms-powerpoint"}
-        ".pot" {"application/vnd.ms-powerpoint"}
-        ".pps" {"application/vnd.ms-powerpoint"}
-        ".ppa" {"application/vnd.ms-powerpoint"}
+        ".ppt" { "application/vnd.ms-powerpoint" }
+        ".pot" { "application/vnd.ms-powerpoint" }
+        ".pps" { "application/vnd.ms-powerpoint" }
+        ".ppa" { "application/vnd.ms-powerpoint" }
 
-        ".pptx" {"application/vnd.openxmlformats-officedocument.presentationml.presentation"}
-        ".potx" {"application/vnd.openxmlformats-officedocument.presentationml.template"}
-        ".ppsx" {"application/vnd.openxmlformats-officedocument.presentationml.slideshow"}
-        ".ppam" {"application/vnd.ms-powerpoint.addin.macroEnabled.12"}
-        ".pptm" {"application/vnd.ms-powerpoint.presentation.macroEnabled.12"}
-        ".potm" {"application/vnd.ms-powerpoint.template.macroEnabled.12"}
-        ".ppsm" {"application/vnd.ms-powerpoint.slideshow.macroEnabled.12"}
+        ".pptx" { "application/vnd.openxmlformats-officedocument.presentationml.presentation" }
+        ".potx" { "application/vnd.openxmlformats-officedocument.presentationml.template" }
+        ".ppsx" { "application/vnd.openxmlformats-officedocument.presentationml.slideshow" }
+        ".ppam" { "application/vnd.ms-powerpoint.addin.macroEnabled.12" }
+        ".pptm" { "application/vnd.ms-powerpoint.presentation.macroEnabled.12" }
+        ".potm" { "application/vnd.ms-powerpoint.template.macroEnabled.12" }
+        ".ppsm" { "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" }
 
-        ".gif" {"image/gif"}
-        ".png" {"image/png"}
-        {$_ -in ".jpg",".jpeg"} {"image/jpeg"}
+        ".gif" { "image/gif" }
+        ".png" { "image/png" }
+        { $_ -in ".jpg", ".jpeg" } { "image/jpeg" }
 
-        {$_ -in ".htm",".html"} {"text/html"}
-        ".js" {"application/x-javascript"}
-        ".css" {"text/css"}
+        { $_ -in ".htm", ".html" } { "text/html" }
+        ".js" { "application/x-javascript" }
+        ".css" { "text/css" }
 
-        ".mp3" {"audio/mpeg"}
-        ".avi" {"video/x-msvideo"}
+        ".mp3" { "audio/mpeg" }
+        ".avi" { "video/x-msvideo" }
 
-        ".pdf" {"application/pdf"}
-        ".zip" {"application/zip"}
-        ".txt" {"text/plain"}
-        default {"application/octet-stream"}
+        ".pdf" { "application/pdf" }
+        ".zip" { "application/zip" }
+        ".txt" { "text/plain" }
+        default { "application/octet-stream" }
     }
 }
 
-
-
+# https://rosettacode.org/wiki/Reverse_words_in_a_string#PowerShell
+function Reverse-Words($lines) {
+    $lines | foreach { 
+        $array = $PSItem.Split(' ') 
+        $array[($array.Count - 1)..0] -join ' '
+    } 
+}
 
 
 # Http Server
@@ -76,12 +81,11 @@ $http.Start()
 
 # Log ready message to terminal 
 if ($http.IsListening) {
-    write-host " HTTP Server Ready!  " -f 'black' -b 'gre'
-    write-host "now try going to $($http.Prefixes)" -f 'y'
-    write-host "then try going to $($http.Prefixes)other/path" -f 'y'
+    write-host "Now loaded at $($http.Prefixes)" -f 'y'
 
     # Start-Process -Path $SERVER_URL
-    & "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "--app=$SERVER_URL"
+    #& "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "--app=$SERVER_URL"
+    & "start" "chrome" "--app=$SERVER_URL"
 }
 
 [console]::TreatControlCAsInput = $true
@@ -96,8 +100,7 @@ while ($http.IsListening) {
     while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
         if ([console]::KeyAvailable) {
             $key = [system.console]::readkey($true)
-            if (($key.modifiers -band [consolemodifiers]"control") -and ($key.key -eq "C"))
-            {
+            if (($key.modifiers -band [consolemodifiers]"control") -and ($key.key -eq "C")) {
                 $http.Stop()
                 write-host ""
                 write-host " Stopped server. " -f 'black' -b 'red'
@@ -126,15 +129,56 @@ while ($http.IsListening) {
         write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
 
 
-        if ($context.Request.RawUrl.StartsWith('/api')) {
-            # Handle /api paths separately
+        if ($context.Request.RawUrl.StartsWith('/api/search')) {
 
-            # the html/data you want to send to the browser
-            # you could replace this with: [string]$html = Get-Content "C:\some\path\index.html" -Raw
-            [string]$html = "{""test"":""hello world""}" 
+            # Handle /api paths separately
+            [string]$queryString = $context.Request.QueryString['q']
+            # $queryStringSplit = (-Split $queryString)
+            
+
+            if ($queryString.Length -le 3) {
+                continue;
+            }
+
+            if ($queryString) {
+                Write-Host "Searching for $queryString..."
+                $queryStringReversed = Reverse-Words $queryString
+                Write-Host $queryStringReversed
+                $filter = "(displayname -like ""$queryString*"") -or (displayname -like ""$queryStringReversed*"")"
+                $results = @(Get-ADUser -filter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
+                # $results = Get-ADUser -filter { displayname -like "$queryString*" -or surname -like $queryString } -Properties Department, Name, displayname -ResultPageSize 10
+
+            }
+            else {
+                $results = @()
+            }
+
+            $parsedResults = @()
+
+            foreach ($result in $results) {
+                $parsedResults += @{
+                    name       = $result.DisplayName
+                    department = $result.Department
+                    id         = $result.CN
+                    emailAlias = $result.EmailAddress
+                    email      = $result.UserPrincipalName
+                    title      = $result.Title
+                    phone      = $result.OfficePhone
+                    location   = $result.Office
+                }
+            }
+
+            [string]$json = ConvertTo-Json -InputObject $parsedResults
+
+            if (!$json) {
+                $json = "[]"
+            }
+
+            $resultCount = $results.Length
+            Write-Host "$resultsCount results"
             
             #resposed to the request
-            $buffer = [System.Text.Encoding]::UTF8.GetBytes($html) # convert htmtl to bytes
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes($json) # convert htmtl to bytes
             $context.Response.ContentLength64 = $buffer.Length
             $context.Response.ContentType = "application/json"
             $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to broswer

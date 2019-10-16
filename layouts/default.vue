@@ -1,6 +1,7 @@
 <template>
   <div>
-    <nav
+    <nuxt />
+    <!-- <nav
       class="navbar header has-shadow is-primary"
       role="navigation"
       aria-label="main navigation"
@@ -35,7 +36,7 @@
       <div class="container column is-10">
         <nuxt />
       </div>
-    </section>
+    </section>-->
   </div>
 </template>
 
@@ -59,3 +60,8 @@ export default {
   }
 }
 </script>
+
+<style>
+@import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css';
+@import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css';
+</style>
