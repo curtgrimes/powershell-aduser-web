@@ -81,20 +81,9 @@ export default {
   data() {
     return {
       searchQuery: null,
-      focusedElementRef: '0-name',
-      showCopiedTooltip: true,
-      results: [
-        {
-          id: 'A1638918',
-          title: 'Info Tech Manager Assistant',
-          email: 'A1638918@mail.niu.edu',
-          department: 'Housing & Residential Services',
-          emailAlias: 'cgrimes@niu.edu',
-          location: 'NN B20',
-          name: 'Curt Grimes',
-          phone: '815-753-9568'
-        }
-      ]
+      focusedElementRef: null,
+      showCopiedTooltip: false,
+      results: []
     }
   },
 
