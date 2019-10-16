@@ -1,45 +1,61 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="primary">
-      <b-form-input
-        @input="getResults()"
-        @keydown.esc="resetSearchInput()"
-        @keydown.down="focus('0-name')"
-        v-model="searchQuery"
-        autofocus
-        ref="search"
-        placeholder="Search for a user"
-        size="lg"
-        class="mx-auto my-3"
-        style="max-width:40rem"
-      ></b-form-input>
+      <div class="position-relative mx-auto my-1" style="width:40rem;max-width:100%">
+        <div
+          v-if="loading"
+          variant="primary"
+          class="position-absolute d-flex align-items-center pr-3"
+          style="right:0;top:0;bottom:0"
+        >
+          <b-spinner />
+        </div>
+        <b-form-input
+          @input="focusedElementRef = null; loading = true; getResults()"
+          @keydown.esc="resetSearchInput()"
+          @keydown.down="focus('0-name')"
+          v-model="searchQuery"
+          autofocus
+          ref="search"
+          placeholder="Search for a user"
+          size="lg"
+        ></b-form-input>
+      </div>
     </b-navbar>
-    <b-container class="py-3" style="max-width:40rem">
-      <transition-group name="flip-list">
-        <div v-for="(result, index) in results" :key="result.id">
-          <div class="row">
-            <div class="col-5">
-              <h3>
+    <b-container class="py-3">
+      <div v-for="(result, index) in results" :key="result.id">
+        <div class="mx-auto" style="max-width:40rem">
+          <div class="row mx-auto">
+            <div class="col-5 pl-0">
+              <h4>
                 <span
                   tabindex="0"
-                  class="d-inline-block"
+                  class="d-block"
+                  :id="index + '-name'"
                   :ref="index + '-name'"
-                  @keydown.esc="resetSearchInput()"
-                  @keydown.down="focus(index + '-id')"
-                  @keydown.up="index === 0 ? resetSearchInput() : focus((index - 1) + '-name')"
-                  @keydown.enter="copyText(result.name)"
+                  v-b-tooltip.manual.v-warning="'Copied!'"
+                  @keydown.esc.exact="resetSearchInput()"
+                  @keydown.down.exact="focus(index + '-id')"
+                  @keydown.up.exact="index === 0 ? resetSearchInput() : focus((index - 1) + '-id')"
+                  @keydown.enter.exact="copyText(result.name)"
+                  @click="copyText(result.id)"
+                  @keydown.enter.ctrl="copyTextAndClose(result.id)"
                   :class="highlightIfFocused(index + '-name')"
                 >{{result.name}}</span>
                 <small
                   tabindex="0"
+                  :id="index + '-id'"
                   :ref="index + '-id'"
-                  @keydown.up="focus(index + '-name')"
-                  @keydown.down="focus((index < results.length - 1) ? ((index + 1) + '-name') : (index + '-id'))"
-                  @keydown.esc="resetSearchInput()"
-                  @keydown.enter="copyText(result.id)"
+                  v-b-tooltip.manual.v-warning="'Copied!'"
+                  @keydown.up.exact="focus(index + '-name')"
+                  @keydown.down.exact="focus((index < results.length - 1) ? ((index + 1) + '-name') : (index + '-id'))"
+                  @keydown.esc.exact="resetSearchInput()"
+                  @keydown.enter.exact="copyText(result.id)"
+                  @click="copyText(result.id)"
+                  @keydown.enter.ctrl="copyTextAndClose(result.id)"
                   :class="highlightIfFocused(index + '-id')"
                 >{{result.id}}</small>
-              </h3>
+              </h4>
             </div>
             <div class="col-7">
               <p class="mb-0 small">
@@ -57,9 +73,9 @@
               </p>
             </div>
           </div>
-          <hr />
         </div>
-      </transition-group>
+        <hr />
+      </div>
     </b-container>
     <!-- {{focusedElementRef}}
     <b-button ref="testthing" id="tooltip-button-1" variant="primary">I have a tooltip</b-button>-->
@@ -81,6 +97,7 @@ export default {
   data() {
     return {
       searchQuery: null,
+      loading: false,
       focusedElementRef: null,
       showCopiedTooltip: false,
       results: []
@@ -89,6 +106,14 @@ export default {
 
   mounted() {
     this.centerWindow()
+
+    window.addEventListener(
+      'unload',
+      () => {
+        navigator.sendBeacon('/api/quit')
+      },
+      false
+    )
   },
 
   methods: {
@@ -97,6 +122,7 @@ export default {
         .then((response) => response.json())
         .then((json) => {
           this.results = json
+          this.loading = false
         })
     }, 750),
 
@@ -118,17 +144,27 @@ export default {
       // this.keyboardNavigation.currentElement = newElementName
     },
 
-    copyText: function(text) {
+    copyText: function(text, { closeAfterCopy = false } = {}) {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          console.log('copied')
-          this.showCopiedTooltip = true
+          if (closeAfterCopy) {
+            window.close()
+          } else {
+            this.$root.$emit('bv::show::tooltip', this.focusedElementRef)
+            setTimeout(() => {
+              this.$root.$emit('bv::hide::tooltip')
+            }, 500)
+          }
         })
         .catch((e) => {
           console.log(e)
           alert('Something went wrong')
         })
+    },
+
+    copyTextAndClose: function(text) {
+      this.copyText(text, { closeAfterCopy: true })
     },
 
     centerWindow() {
@@ -154,10 +190,6 @@ export default {
 </script>
 
 <style>
-.flip-list-move {
-  transition: transform 1s;
-}
-
 /* Bootstrap focus outline tweak */
 :focus {
   outline: none;

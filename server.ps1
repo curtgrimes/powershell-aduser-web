@@ -128,8 +128,14 @@ while ($http.IsListening) {
         # Log the request to the terminal
         write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
 
-
-        if ($context.Request.RawUrl.StartsWith('/api/search')) {
+        
+        if ($context.Request.RawUrl.StartsWith('/api/quit')) {
+            $http.Stop()
+            write-host ""
+            write-host " Stopped server because webpage closed. " -f 'black' -b 'red'
+            break;
+        }
+        elseif ($context.Request.RawUrl.StartsWith('/api/search')) {
 
             # Handle /api paths separately
             [string]$queryString = $context.Request.QueryString['q']
@@ -141,11 +147,11 @@ while ($http.IsListening) {
             }
 
             if ($queryString) {
-                Write-Host "Searching for $queryString..."
+                # Write-Host "Searching for $queryString..."
                 $queryStringReversed = Reverse-Words $queryString
-                Write-Host $queryStringReversed
+                # Write-Host $queryStringReversed
                 $filter = "(displayname -like ""$queryString*"") -or (displayname -like ""$queryStringReversed*"")"
-                $results = @(Get-ADUser -filter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
+                $results = @(Get-ADUser -filter $filter -SearchBase "OU=DK,DC=niunt,DC=niu,DC=edu" -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
                 # $results = Get-ADUser -filter { displayname -like "$queryString*" -or surname -like $queryString } -Properties Department, Name, displayname -ResultPageSize 10
 
             }
@@ -175,7 +181,6 @@ while ($http.IsListening) {
             }
 
             $resultCount = $results.Length
-            Write-Host "$resultsCount results"
             
             #resposed to the request
             $buffer = [System.Text.Encoding]::UTF8.GetBytes($json) # convert htmtl to bytes
