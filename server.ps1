@@ -129,11 +129,11 @@ while ($http.IsListening) {
         write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
 
         
-        if ($context.Request.RawUrl.StartsWith('/api/quit')) {
+        if ($context.Request.RawUrl -eq '/api/quit') {
             $http.Stop()
             write-host ""
             write-host " Stopped server because webpage closed. " -f 'black' -b 'red'
-            break;
+            stop-process -Id $PID
         }
         elseif ($context.Request.RawUrl.StartsWith('/api/search')) {
 
@@ -142,16 +142,22 @@ while ($http.IsListening) {
             # $queryStringSplit = (-Split $queryString)
             
 
-            if ($queryString.Length -le 3) {
-                continue;
+            if ($queryString.Length -le 2) {
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes("{""error"": ""Keep typing to see results.""}") # convert htmtl to bytes
+                $context.Response.statuscode = 422 
+                $context.Response.ContentType = "application/json"
+                $context.Response.ContentLength64 = $buffer.Length
+                $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to broswer
+                $context.Response.OutputStream.Close() # close the response
+                continue; # next listen loop
             }
 
             if ($queryString) {
                 # Write-Host "Searching for $queryString..."
-                $queryStringReversed = Reverse-Words $queryString
+                # $queryStringReversed = Reverse-Words $queryString
                 # Write-Host $queryStringReversed
-                $filter = "(displayname -like ""$queryString*"") -or (displayname -like ""$queryStringReversed*"")"
-                $results = @(Get-ADUser -filter $filter -SearchBase "OU=DK,DC=niunt,DC=niu,DC=edu" -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
+                $filter = "(displayname -like ""$queryString*"") -or (surname -like ""$queryString*"")"
+                $results = @(Get-ADUser -filter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
                 # $results = Get-ADUser -filter { displayname -like "$queryString*" -or surname -like $queryString } -Properties Department, Name, displayname -ResultPageSize 10
 
             }
@@ -179,8 +185,6 @@ while ($http.IsListening) {
             if (!$json) {
                 $json = "[]"
             }
-
-            $resultCount = $results.Length
             
             #resposed to the request
             $buffer = [System.Text.Encoding]::UTF8.GetBytes($json) # convert htmtl to bytes
@@ -192,8 +196,8 @@ while ($http.IsListening) {
         else {
             # Serve content from /dist folder
 
-            $path = Join-Path "./dist" $context.Request.RawUrl -Resolve -ErrorAction SilentlyContinue
-            
+            $path = Join-Path $PSScriptRoot "/dist" $context.Request.RawUrl -Resolve -ErrorAction SilentlyContinue
+
             if ($path -and (Get-Item $path -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo]) {
                 # Path exists and it points to a directory; serve index.html if it exists in this directory.
                 $path = Join-Path $path "/index.html" -ErrorAction SilentlyContinue

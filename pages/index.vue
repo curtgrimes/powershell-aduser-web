@@ -3,15 +3,17 @@
     <b-navbar toggleable="lg" type="dark" variant="primary">
       <div class="position-relative mx-auto my-1" style="width:40rem;max-width:100%">
         <div
-          v-if="loading"
-          variant="primary"
           class="position-absolute d-flex align-items-center pr-3"
           style="right:0;top:0;bottom:0"
         >
-          <b-spinner />
+          <span
+            v-if="showKeepTypingMessage"
+            class="small text-muted d-inline-block mr-3 font-weight-bold"
+          >Keep typing to see results.</span>
+          <b-spinner v-if="loading" variant="primary" />
         </div>
         <b-form-input
-          @input="focusedElementRef = null; loading = true; getResults()"
+          @input="focusedElementRef = null; getResults()"
           @keydown.esc="resetSearchInput()"
           @keydown.down="focus('0-name')"
           v-model="searchQuery"
@@ -98,6 +100,7 @@ export default {
     return {
       searchQuery: null,
       loading: false,
+      showKeepTypingMessage: false,
       focusedElementRef: null,
       showCopiedTooltip: false,
       results: []
@@ -118,11 +121,33 @@ export default {
 
   methods: {
     getResults: throttle(function() {
+      this.loading = true
+      this.showKeepTypingMessage = false
+
       fetch('/api/search?q=' + this.searchQuery)
+        .then((response) => {
+          if (!response.ok) {
+            throw response
+          } else {
+            return response
+          }
+        })
         .then((response) => response.json())
         .then((json) => {
           this.results = json
           this.loading = false
+        })
+        .catch((errorResponse) => {
+          if (errorResponse.status === 422) {
+            // Need to type more to see results
+            this.showKeepTypingMessage = true
+            this.loading = false
+
+            if (!this.searchQuery) {
+              // If they cleared the search field, hide this message completely
+              this.showKeepTypingMessage = false
+            }
+          }
         })
     }, 750),
 
@@ -139,9 +164,7 @@ export default {
     },
 
     focus: function(refName) {
-      console.log('focusing ' + refName)
       this.focusedElementRef = refName
-      // this.keyboardNavigation.currentElement = newElementName
     },
 
     copyText: function(text, { closeAfterCopy = false } = {}) {
@@ -149,7 +172,11 @@ export default {
         .writeText(text)
         .then(() => {
           if (closeAfterCopy) {
-            window.close()
+            fetch('/api/quit')
+
+            setTimeout(() => {
+              window.close()
+            }, 200)
           } else {
             this.$root.$emit('bv::show::tooltip', this.focusedElementRef)
             setTimeout(() => {
