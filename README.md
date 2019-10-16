@@ -1,10 +1,8 @@
 # powershell-aduser-web
 
-> My fine Nuxt.js project
-
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 $ npm run install
 
