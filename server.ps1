@@ -154,10 +154,11 @@ while ($http.IsListening) {
 
             if ($queryString) {
                 # Write-Host "Searching for $queryString..."
-                # $queryStringReversed = Reverse-Words $queryString
-                # Write-Host $queryStringReversed
-                $filter = "(displayname -like ""$queryString*"") -or (surname -like ""$queryString*"")"
-                $results = @(Get-ADUser -filter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultPageSize 10)
+                $queryStringSplit = [string]$queryString -split " "
+
+                $filter = "(|(displayname=$queryString*)(sn=$queryString*)(mail=$queryString*)(Name=$queryString*)(&(sn=" + $queryStringSplit[0] + "*)(GivenName=" + $queryStringSplit[1] + "*)))"
+
+                $results = @(Get-ADUser -LDAPFilter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultSetSize 20)
                 # $results = Get-ADUser -filter { displayname -like "$queryString*" -or surname -like $queryString } -Properties Department, Name, displayname -ResultPageSize 10
 
             }

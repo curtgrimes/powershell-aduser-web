@@ -40,6 +40,7 @@
                   @keydown.down.exact="focus(index + '-id')"
                   @keydown.up.exact="index === 0 ? resetSearchInput() : focus((index - 1) + '-id')"
                   @keydown.enter.exact="copyText(result.name)"
+                  @keydown.ctrl.67="copyText(result.name)"
                   @click="copyText(result.id)"
                   @keydown.enter.ctrl="copyTextAndClose(result.id)"
                   :class="highlightIfFocused(index + '-name')"
@@ -53,6 +54,7 @@
                   @keydown.down.exact="focus((index < results.length - 1) ? ((index + 1) + '-name') : (index + '-id'))"
                   @keydown.esc.exact="resetSearchInput()"
                   @keydown.enter.exact="copyText(result.id)"
+                  @keydown.ctrl.67="copyText(result.id)"
                   @click="copyText(result.id)"
                   @keydown.enter.ctrl="copyTextAndClose(result.id)"
                   :class="highlightIfFocused(index + '-id')"
@@ -119,12 +121,25 @@ export default {
     )
   },
 
+  created() {
+    this.abortSearchControllers = []
+  },
+
   methods: {
     getResults: throttle(function() {
       this.loading = true
       this.showKeepTypingMessage = false
 
-      fetch('/api/search?q=' + this.searchQuery)
+      // Abort any existing searches before starting a new search
+      this.abortAnyInProgressSearches()
+
+      const abortController = new AbortController()
+      const signal = abortController.signal
+      this.abortSearchControllers.push(abortController)
+
+      fetch('/api/search?q=' + this.searchQuery, {
+        signal
+      })
         .then((response) => {
           if (!response.ok) {
             throw response
@@ -149,7 +164,13 @@ export default {
             }
           }
         })
-    }, 750),
+    }, 300),
+
+    abortAnyInProgressSearches() {
+      this.abortSearchControllers.forEach((signal) => signal.abort())
+
+      this.abortSearchControllers = []
+    },
 
     highlightIfFocused(refName) {
       if (this.focusedElementRef == refName) {
@@ -196,7 +217,7 @@ export default {
 
     centerWindow() {
       setTimeout(() => {
-        const windowWidth = screen.width / 1.5
+        const windowWidth = screen.width / 2
         const windowHeight = screen.height / 2
         const xPos = screen.width / 2 - windowWidth / 2
         const yPos = screen.height / 2 - windowHeight / 2
