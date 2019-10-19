@@ -1,7 +1,4 @@
-# This is a super **SIMPLE** example of how to create a very basic powershell webserver
-# 2019-05-18 UPDATE — Created by me and and evalued by @jakobii and the comunity.
-# Based off of https://gist.github.com/19WAS85/5424431
-
+# Requires -Version 6.0
 
 # https://gist.github.com/theit8514/58a31895ae901206f6957a382f61618b
 function Get-MimeType() {
