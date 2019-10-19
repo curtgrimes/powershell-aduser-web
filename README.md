@@ -2,7 +2,7 @@
 
 Simple web-based UI with keyboard shortcuts for navigating `Get-ADUser` results. Provides deep links to Microsoft Teams and the Outlook user availability window. Made this as a shortcut for tasks I do many times a day.
 
-## Usage
+## Installation and Usage
 
 1. Go to [Releases](https://github.com/curtgrimes/powershell-aduser-web/releases/latest)
 1. Download the latest release and unzip it
