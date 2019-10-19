@@ -1,6 +1,6 @@
 {
   "name": "powershell-aduser-web",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Simple web-based UI with keyboard shortcuts for navigating `Get-ADUser` results. Provides deep links to Microsoft Teams and the Outlook user availability window. Made this as a shortcut for tasks I do many times a day.",
   "author": "Curt Grimes",
   "private": true,
