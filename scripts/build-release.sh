@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-npm run build
+npm run generate
 
 rm -rf ./release
 mkdir -p ./release/tmp
