@@ -128,12 +128,31 @@ while ($http.IsListening) {
         # Log the request to the terminal
         write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
 
-        
         if ($context.Request.RawUrl -eq '/api/quit') {
             $http.Stop()
             write-host ""
             write-host " Stopped server because webpage closed. " -f 'black' -b 'red'
             stop-process -Id $PID
+        }
+        
+        elseif ($context.Request.RawUrl.StartsWith('/api/get-availability')) {
+            [string]$email = $context.Request.QueryString['email']
+
+            # Open up Outlook appointment availability view with the given person set as an attendee
+            $Outlook = New-Object -ComObject Outlook.Application
+            $appointment = $Outlook.CreateItem(1)
+            $appointment.Recipients.Add($email)
+            $appointment.GetInspector.SetCurrentFormPage("Scheduling Assistant")
+            $appointment.display() # show the window
+
+
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes("200 OK") # convert html to bytes
+            $context.Response.statuscode = 200 
+            $context.Response.ContentLength64 = $buffer.Length
+
+            $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to broswer
+            $context.Response.OutputStream.Close() # close the response
+            continue; # next listen loop
         }
         elseif ($context.Request.RawUrl.StartsWith('/api/search')) {
 
@@ -141,12 +160,14 @@ while ($http.IsListening) {
             [string]$queryString = $context.Request.QueryString['q']
             # $queryStringSplit = (-Split $queryString)
             
+            $context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
 
             if ($queryString.Length -le 2) {
-                $buffer = [System.Text.Encoding]::UTF8.GetBytes("{""error"": ""Keep typing to see results.""}") # convert htmtl to bytes
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes("{""error"": ""Keep typing to see results.""}") # convert html to bytes
                 $context.Response.statuscode = 422 
                 $context.Response.ContentType = "application/json"
                 $context.Response.ContentLength64 = $buffer.Length
+
                 $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to broswer
                 $context.Response.OutputStream.Close() # close the response
                 continue; # next listen loop
