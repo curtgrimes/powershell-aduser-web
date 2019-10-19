@@ -257,7 +257,7 @@ export default {
           'https://teams.microsoft.com/l/chat/0/0?users=' +
             this.results[this.keyboard.focusedRowIndex].email
         )
-        window.close()
+        // window.close()
       }
     })
 
@@ -269,7 +269,7 @@ export default {
         window.open(
           'mailto:' + this.results[this.keyboard.focusedRowIndex].emailAlias
         )
-        window.close()
+        // window.close()
       }
     })
 
@@ -282,7 +282,7 @@ export default {
           '/api/get-availability?email=' +
             this.results[this.keyboard.focusedRowIndex].emailAlias
         ).then(() => {
-          window.close()
+          // window.close()
         })
       }
     })
