@@ -57,14 +57,6 @@ function Get-MimeType() {
     }
 }
 
-# https://rosettacode.org/wiki/Reverse_words_in_a_string#PowerShell
-function Reverse-Words($lines) {
-    $lines | foreach { 
-        $array = $PSItem.Split(' ') 
-        $array[($array.Count - 1)..0] -join ' '
-    } 
-}
-
 
 # Http Server
 $http = [System.Net.HttpListener]::new() 
@@ -116,14 +108,6 @@ while ($http.IsListening) {
 
     $context = $contextTask.GetAwaiter().GetResult()
 
-    # Get Request Url
-    # When a request is made in a web browser the GetContext() method will return a request object
-    # Our route examples below will use the request object properties to decide how to respond
-    # $context = $contextTask.GetAwaiter().GetResult()
-
-
-    # ROUTE EXAMPLE 1
-    # http://127.0.0.1/
     if ($context.Request.HttpMethod -eq 'GET') {
         # Log the request to the terminal
         write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
@@ -180,7 +164,6 @@ while ($http.IsListening) {
                 $filter = "(|(displayname=$queryString*)(sn=$queryString*)(mail=$queryString*)(Name=$queryString*)(&(sn=" + $queryStringSplit[0] + "*)(GivenName=" + $queryStringSplit[1] + "*)))"
 
                 $results = @(Get-ADUser -LDAPFilter $filter -Properties DisplayName, Department, CN, EmailAddress, UserPrincipalName, Title, Office, OfficePhone -ResultSetSize 20)
-                # $results = Get-ADUser -filter { displayname -like "$queryString*" -or surname -like $queryString } -Properties Department, Name, displayname -ResultPageSize 10
 
             }
             else {
@@ -251,57 +234,5 @@ while ($http.IsListening) {
     
     }
 
-
-    # # ROUTE EXAMPLE 2
-    # # http://127.0.0.1/some/form'
-    # if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -eq '/some/form') {
-
-    #     # We can log the request to the terminal
-    #     write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
-
-    #     [string]$html = "
-    #     <h1>A Powershell Webserver</h1>
-    #     <form action='/some/post' method='post'>
-    #         <p>A Basic Form</p>
-    #         <p>fullname</p>
-    #         <input type='text' name='fullname'>
-    #         <p>message</p>
-    #         <textarea rows='4' cols='50' name='message'></textarea>
-    #         <br>
-    #         <input type='submit' value='Submit'>
-    #     </form>
-    #     "
-
-    #     #resposed to the request
-    #     $buffer = [System.Text.Encoding]::UTF8.GetBytes($html) 
-    #     $context.Response.ContentLength64 = $buffer.Length
-    #     $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) 
-    #     $context.Response.OutputStream.Close()
-    # }
-
-    # # ROUTE EXAMPLE 3
-    # # http://127.0.0.1/some/post'
-    # if ($context.Request.HttpMethod -eq 'POST' -and $context.Request.RawUrl -eq '/some/post') {
-
-    #     # decode the form post
-    #     # html form members need 'name' attributes as in the example!
-    #     $FormContent = [System.IO.StreamReader]::new($context.Request.InputStream).ReadToEnd()
-
-    #     # We can log the request to the terminal
-    #     write-host "$($context.Request.UserHostAddress)  =>  $($context.Request.Url)" -f 'mag'
-    #     Write-Host $FormContent -f 'Green'
-
-    #     # the html/data
-    #     [string]$html = "<h1>A Powershell Webserver</h1><p>Post Successful!</p>" 
-
-    #     #resposed to the request
-    #     $buffer = [System.Text.Encoding]::UTF8.GetBytes($html)
-    #     $context.Response.ContentLength64 = $buffer.Length
-    #     $context.Response.OutputStream.Write($buffer, 0, $buffer.Length)
-    #     $context.Response.OutputStream.Close() 
-    # }
-
-
-    # powershell will continue looping and listen for new requests...
 } 
 
